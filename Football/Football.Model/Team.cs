@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Numerics;
 
-namespace Football.WebApi
+namespace Football.Model
 {
     public class Team
     {
