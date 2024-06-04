@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Football.Common\Football.Common.csproj" />
+    <ProjectReference Include="..\Football.Model\Football.Model.csproj" />
+    <ProjectReference Include="..\Football.Repository\Football.Repository.csproj" />
+    <ProjectReference Include="..\Football.Service.Common\Football.Service.Common.csproj" />
+  </ItemGroup>
+
+</Project>
