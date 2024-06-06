@@ -5,12 +5,12 @@ namespace Football.Repository.Common
 {
     public interface IFootballRepository
     {
-        string PostPlayer(Player player);
-        string DeletePlayer(Player player);
-        public List<Player> GetPlayer();
+        Task<string> PostPlayerAsync(Player player);
+        Task<string> DeletePlayerAsync(Player player);
+        Task<List<Player>> GetPlayerAsync();
 
-        public Player GetPlayerById(Guid id);
+        Task<Player> GetPlayerByIdAsync(Guid id);
 
-        public string UpdatePlayers(Guid id, Player player);
+        Task<string> UpdatePlayersAsync(Guid id, Player player);
     }
 }
