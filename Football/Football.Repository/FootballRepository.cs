@@ -16,15 +16,16 @@ namespace Football.Repository
         string connString = "Host=localhost;Username=postgres;Password=fcfullam13;Database=footballPlayers";
 
 
-        public string PostPlayer(Player player)
+        public async Task<string> PostPlayerAsync(Player player)
         {
             try
             {
                 
                 using var conn = new NpgsqlConnection(connString);
                 var commandText = "INSERT INTO \"Players\" VALUES (@player_id,@team_id, @player_name,@position,@number,@age,@nationality);";
-
+                
                 using var command = new NpgsqlCommand(commandText, conn);
+                
 
                 command.Parameters.AddWithValue("@player_id", NpgsqlTypes.NpgsqlDbType.Uuid, Guid.NewGuid());
                 command.Parameters.AddWithValue("@team_id", NpgsqlTypes.NpgsqlDbType.Uuid, (object)player.TeamId ?? DBNull.Value);
@@ -35,21 +36,21 @@ namespace Football.Repository
                 command.Parameters.AddWithValue("@nationality", player.Nationality);
 
                 conn.Open();
-                var numberOfCommits = command.ExecuteNonQuery();
+                var numberOfCommits = await command.ExecuteNonQueryAsync();
                 if (numberOfCommits == 0)
                 {
                     return "Not found";
                 }
                 return "Succesfully added";
-            }
+            } 
             catch (Exception ex)
             {
                 return (ex.Message);
             }
-
+            
         }
         
-        public string  DeletePlayer(Player player)
+        public async Task<string> DeletePlayerAsync(Player player)
         {
             try
             {
@@ -57,12 +58,12 @@ namespace Football.Repository
                 var commandText = "DELETE FROM \"Players\" WHERE player_id = @player_id;;";
 
                 using var command = new NpgsqlCommand(commandText, conn);
-
+                
                 command.Parameters.AddWithValue("@player_id", NpgsqlTypes.NpgsqlDbType.Uuid, player.PlayerId);
 
 
                 conn.Open();
-                var numberOfCommits = command.ExecuteNonQuery();
+                var numberOfCommits = await command.ExecuteNonQueryAsync();
                 if (numberOfCommits == 0)
                 {
                     return "Player not found.";
@@ -76,7 +77,7 @@ namespace Football.Repository
 
         }
        
-        public List<Player> GetPlayer()
+        public async Task<List<Player>> GetPlayerAsync()
 
         {
             var players = new List<Player>();
@@ -89,11 +90,12 @@ namespace Football.Repository
                 using var command = new NpgsqlCommand(commandText, conn);
 
                 conn.Open();
-                using var reader = command.ExecuteReader();
+                using var reader = await command.ExecuteReaderAsync();
+                
 
                 if (reader.HasRows)
                 {
-                    while (reader.Read())
+                    while (await reader.ReadAsync())
                     {
                         var footballPlayer = new Player();
                         footballPlayer.PlayerId = Guid.Parse(reader[0].ToString());
@@ -105,7 +107,7 @@ namespace Football.Repository
                         footballPlayer.Nationality = reader[6].ToString();
 
                         players.Add(footballPlayer);
-
+                        
                     }
                 }
             }
@@ -117,7 +119,7 @@ namespace Football.Repository
 
         }
         
-        public Player GetPlayerById(Guid id)
+        public async Task<Player> GetPlayerByIdAsync(Guid id)
 
         {
             var footballPlayer = new Player();
@@ -134,12 +136,12 @@ namespace Football.Repository
                 command.Parameters.AddWithValue("@id", id);
 
                 conn.Open();
-                using var reader = command.ExecuteReader();
+                using var reader =await command.ExecuteReaderAsync();
 
                 if (reader.HasRows)
                 {
 
-                    reader.Read();
+                    await reader.ReadAsync();
                     footballPlayer.PlayerId = Guid.Parse(reader[0].ToString());
                     footballPlayer.TeamId = Guid.TryParse(reader[1].ToString(), out var result) ? result : null;
                     footballPlayer.PlayerName = reader[2].ToString();
@@ -168,7 +170,7 @@ namespace Football.Repository
 
 
         
-        public string UpdatePlayers(Guid id, Player player)
+        public async Task<string> UpdatePlayersAsync(Guid id, Player player)
         {
             try
             {
@@ -187,7 +189,7 @@ namespace Football.Repository
 
 
                 conn.Open();
-                var numberOfCommits = command.ExecuteNonQuery();
+                var numberOfCommits = await command.ExecuteNonQueryAsync();
 
                 if (numberOfCommits == 0)
                 {

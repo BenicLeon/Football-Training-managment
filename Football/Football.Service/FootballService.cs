@@ -1,5 +1,5 @@
 ﻿using Football.Model;
-using Football.Repository;
+using Football.Repository.Common;
 using Football.Service.Common;
 
 
@@ -8,25 +8,30 @@ namespace Football.Service
 {
     public class FootballService: IFootballService
     {
-        FootballRepository playerRepository = new FootballRepository();
-        public string PostPlayer(Player player)
+        private IFootballRepository _playerRepository;
+
+        public FootballService(IFootballRepository playerRepository)
+        {
+            _playerRepository = playerRepository;
+        }
+        public Task<string> PostPlayerAsync(Player player)
         {
            
-            return playerRepository.PostPlayer(player);
+            return _playerRepository.PostPlayerAsync(player);
         }
-        public string DeletePlayer(Player player) { 
-            return playerRepository.DeletePlayer(player); 
+        public Task<string> DeletePlayerAsync(Player player) { 
+            return _playerRepository.DeletePlayerAsync(player); 
         }
-        public List<Player> GetPlayer() {
-            return playerRepository.GetPlayer();
+        public Task<List<Player>> GetPlayerAsync() {
+            return _playerRepository.GetPlayerAsync();
         }
-        public Player GetPlayerById(Guid id)
+        public Task<Player> GetPlayerByIdAsync(Guid id)
         {
-            return playerRepository.GetPlayerById(id);
+            return _playerRepository.GetPlayerByIdAsync(id);
         }
-        public string UpdatePlayers(Guid id, Player player)
+        public Task<string> UpdatePlayersAsync(Guid id, Player player)
         {
-            return playerRepository.UpdatePlayers(id, player);
+            return _playerRepository.UpdatePlayersAsync(id, player);
         }
 
     }

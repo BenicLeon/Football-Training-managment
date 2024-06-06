@@ -1,5 +1,5 @@
 ﻿using Football.WebApi;
-using Football.Service;
+using Football.Service.Common;
 using Football.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
@@ -20,23 +20,21 @@ namespace Football.WebApi.Controllers
     {
 
         private readonly ILogger<TeamController> _logger;
-        
+        private IFootballService _footballService;
 
-        public TeamController(ILogger<TeamController> logger)
+        public TeamController(ILogger<TeamController> logger, IFootballService footballService)
         {
             _logger = logger;
+            _footballService = footballService;
             
         }
-
-
-        FootballService service = new FootballService();
 
         [HttpPost("AddPlayer")]
         public ActionResult Post(Player player)
         {
             try
             {
-                service.PostPlayer(player);
+                _footballService.PostPlayerAsync(player);
                 return Ok("Succesfully added");
             }
                
@@ -53,7 +51,7 @@ namespace Football.WebApi.Controllers
             try
             {
                
-                return Ok(service.DeletePlayer(player)); 
+                return Ok(_footballService.DeletePlayerAsync(player)); 
             }
             catch (Exception ex)
             {
@@ -68,7 +66,7 @@ namespace Football.WebApi.Controllers
             try
             {
                 
-                return Ok(service.GetPlayer());
+                return Ok(_footballService.GetPlayerAsync());
             }
             catch (Exception ex)
             {
@@ -82,7 +80,7 @@ namespace Football.WebApi.Controllers
         {
             try
             {
-                service.GetPlayerById(id);
+                _footballService.GetPlayerByIdAsync(id);
                 return Ok("Succesfully updated");
             }
             catch (Exception ex)
@@ -98,7 +96,7 @@ namespace Football.WebApi.Controllers
         {
             try
             {
-               service.UpdatePlayers(id, player);
+                _footballService.UpdatePlayersAsync(id, player);
                 return Ok("Succesfully updated");
             }
             catch (Exception ex)
