@@ -94,13 +94,13 @@ namespace Football.Repository
                 {
                     var footballPlayer = new Player
                     {
-                        PlayerId = reader.GetGuid(reader.GetOrdinal("player_id")),
-                        TeamId = reader.IsDBNull(reader.GetOrdinal("team_id")) ? (Guid?)null : reader.GetGuid(reader.GetOrdinal("team_id")),
-                        PlayerName = reader.IsDBNull(reader.GetOrdinal("player_name")) ? null : reader.GetString(reader.GetOrdinal("player_name")),
-                        Position = reader.IsDBNull(reader.GetOrdinal("position")) ? null : reader.GetString(reader.GetOrdinal("position")),
-                        Number = reader.IsDBNull(reader.GetOrdinal("number")) ? 0 : reader.GetInt32(reader.GetOrdinal("number")),
-                        Age = reader.IsDBNull(reader.GetOrdinal("age")) ? 0 : reader.GetInt32(reader.GetOrdinal("age")),
-                        Nationality = reader.IsDBNull(reader.GetOrdinal("nationality")) ? null : reader.GetString(reader.GetOrdinal("nationality"))
+                        PlayerId = Guid.Parse(reader[0].ToString()),
+                        TeamId = Guid.TryParse(reader[1].ToString(), out var result) ? result : null,
+                        PlayerName = reader[2].ToString(),
+                        Position = reader[3].ToString(),
+                        Number = Convert.ToInt32(reader[4]),
+                        Age = Convert.ToInt32(reader[5]),
+                        Nationality = reader[6].ToString()
                     };
 
                     players.Add(footballPlayer);
