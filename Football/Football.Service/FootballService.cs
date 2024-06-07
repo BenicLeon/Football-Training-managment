@@ -14,24 +14,41 @@ namespace Football.Service
         {
             _playerRepository = playerRepository;
         }
-        public Task<string> PostPlayerAsync(Player player)
+        public async Task<string> PostPlayerAsync(Player player)
         {
-           
-            return _playerRepository.PostPlayerAsync(player);
+            string result = await _playerRepository.PostPlayerAsync(player);
+
+            return result;
         }
-        public Task<string> DeletePlayerAsync(Player player) { 
-            return _playerRepository.DeletePlayerAsync(player); 
+        public async Task<string> DeletePlayerAsync(Guid id) { 
+            string result = await _playerRepository.DeletePlayerAsync(id);
+            return result;
         }
-        public Task<List<Player>> GetPlayerAsync() {
-            return _playerRepository.GetPlayerAsync();
+        public async Task<List<Player>> GetPlayerAsync() {
+            List<Player> players = await _playerRepository.GetPlayerAsync(); 
+            return players;
+               
         }
-        public Task<Player> GetPlayerByIdAsync(Guid id)
+        public async Task<Player> GetPlayerByIdAsync(Guid id)
         {
-            return _playerRepository.GetPlayerByIdAsync(id);
+            Player player = await _playerRepository.GetPlayerByIdAsync(id);
+           return player;
         }
-        public Task<string> UpdatePlayersAsync(Guid id, Player player)
+        public async Task<bool> UpdatePlayersAsync(Guid id, Player player)
+
         {
-            return _playerRepository.UpdatePlayersAsync(id, player);
+            var playerAvailable = await _playerRepository.GetPlayerByIdAsync(id);
+            if (playerAvailable != null && playerAvailable.PlayerId == player.PlayerId)
+            {
+                var updateResult = await _playerRepository.UpdatePlayersAsync(id, player);
+
+                
+                return updateResult;
+            }
+            else
+            {
+                return false;
+            }
         }
 
     }

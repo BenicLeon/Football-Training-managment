@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Numerics;
+using AutoMapper;
 
 namespace Football.WebApi.Controllers
 {
@@ -20,21 +21,24 @@ namespace Football.WebApi.Controllers
     {
 
         private readonly ILogger<TeamController> _logger;
+        private readonly IMapper _mapper;
         private IFootballService _footballService;
 
-        public TeamController(ILogger<TeamController> logger, IFootballService footballService)
+        public TeamController(ILogger<TeamController> logger, IFootballService footballService, IMapper mapper)
         {
             _logger = logger;
             _footballService = footballService;
-            
+            _mapper = mapper; 
+
         }
 
         [HttpPost("AddPlayer")]
-        public ActionResult Post(Player player)
+        public async Task<ActionResult> Post(CreatePlayerDto createPlayerDto)
         {
             try
             {
-                _footballService.PostPlayerAsync(player);
+                var player = _mapper.Map<Player>(createPlayerDto);
+               await _footballService.PostPlayerAsync(player);
                 return Ok("Succesfully added");
             }
                
@@ -46,12 +50,12 @@ namespace Football.WebApi.Controllers
 
         }
         [HttpDelete("DeletePlayer")]
-        public ActionResult Delete(Player player)
+        public async Task<ActionResult> Delete(Guid id)
         {
             try
             {
-               
-                return Ok(_footballService.DeletePlayerAsync(player)); 
+                await _footballService.DeletePlayerAsync(id);
+                return Ok("Successfully deleted");
             }
             catch (Exception ex)
             {
@@ -60,28 +64,39 @@ namespace Football.WebApi.Controllers
 
         }
         [HttpGet("GetAllPlayers")]
-        public ActionResult Get()
-
+        public async Task<ActionResult<IEnumerable<PlayerDto>>> Get()
         {
             try
             {
-                
-                return Ok(_footballService.GetPlayerAsync());
+                var players = await _footballService.GetPlayerAsync();
+                var playerDtos = _mapper.Map<IEnumerable<PlayerDto>>(players);
+
+                // Log the mapped DTOs to ensure they contain the expected values
+                foreach (var playerDto in playerDtos)
+                {
+                    Console.WriteLine($"PlayerId: {playerDto.PlayerId}, PlayerName: {playerDto.PlayerName}, Position: {playerDto.Position}, Number: {playerDto.Number}, Age: {playerDto.Age}, Nationality: {playerDto.Nationality}");
+                }
+
+                return Ok(playerDtos);
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
-
         }
         [HttpGet("GetPlayerById")]
-        public ActionResult Get(Guid id)
+        public async Task<ActionResult<PlayerDto>> Get(Guid id)
 
         {
             try
             {
-                _footballService.GetPlayerByIdAsync(id);
-                return Ok("Succesfully updated");
+                var player = await _footballService.GetPlayerByIdAsync(id);
+                if (player == null)
+                {
+                    return NotFound();
+                }
+                var playerDto = _mapper.Map<PlayerDto>(player);
+                return Ok(playerDto);
             }
             catch (Exception ex)
             {
@@ -92,12 +107,14 @@ namespace Football.WebApi.Controllers
        
 
         [HttpPut("UpdatePlayer/{id}")]
-        public ActionResult Put(Guid id, Player player)
+        public async Task<ActionResult> Put(Guid id, UpdatePlayerDto updatePlayerDto)
         {
             try
             {
-                _footballService.UpdatePlayersAsync(id, player);
-                return Ok("Succesfully updated");
+                var player = _mapper.Map<Player>(updatePlayerDto);
+                player.PlayerId = id;
+                await _footballService.UpdatePlayersAsync(id, player);
+                return Ok("Successfully updated");
             }
             catch (Exception ex)
             {
