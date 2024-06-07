@@ -87,7 +87,7 @@ namespace Football.WebApi.Controllers
                 var player = await _footballService.GetPlayerByIdAsync(id);
                 if (player == null)
                 {
-                    return NotFound();
+                    return NotFound("Player not found");
                 }
                 var playerDto = _mapper.Map<PlayerDto>(player);
                 return Ok(playerDto);
@@ -98,7 +98,7 @@ namespace Football.WebApi.Controllers
             }
 
         }
-       
+
 
         [HttpPut("UpdatePlayer/{id}")]
         public async Task<ActionResult> Put(Guid id, UpdatePlayerDto updatePlayerDto)
@@ -107,15 +107,23 @@ namespace Football.WebApi.Controllers
             {
                 var player = _mapper.Map<Player>(updatePlayerDto);
                 player.PlayerId = id;
-                await _footballService.UpdatePlayersAsync(id, player);
-                return Ok("Successfully updated");
+                var updateResult = await _footballService.UpdatePlayersAsync(id, player);
+
+                if (updateResult)
+                {
+                    return Ok("Successfully updated");
+                }
+                else
+                {
+                    return NotFound("Player not found");
+                }
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
-
         }
+      
     }
 }
 

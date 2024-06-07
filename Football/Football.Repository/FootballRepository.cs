@@ -20,13 +20,14 @@ namespace Football.Repository
         {
             try
             {
-                
                 using var conn = new NpgsqlConnection(connString);
-                var commandText = "INSERT INTO \"Players\" VALUES (@player_id,@team_id, @player_name,@position,@number,@age,@nationality);";
-                
-                using var command = new NpgsqlCommand(commandText, conn);
-                
+                await conn.OpenAsync();
 
+               
+                var commandText = "INSERT INTO \"Players\" (player_id, team_id, player_name, position, number, age, nationality) VALUES (@player_id, @team_id, @player_name, @position, @number, @age, @nationality)";
+                using var command = new NpgsqlCommand(commandText, conn);
+
+                
                 command.Parameters.AddWithValue("@player_id", NpgsqlTypes.NpgsqlDbType.Uuid, Guid.NewGuid());
                 command.Parameters.AddWithValue("@team_id", NpgsqlTypes.NpgsqlDbType.Uuid, (object)player.TeamId ?? DBNull.Value);
                 command.Parameters.AddWithValue("@player_name", player.PlayerName);
@@ -35,19 +36,20 @@ namespace Football.Repository
                 command.Parameters.AddWithValue("@age", player.Age);
                 command.Parameters.AddWithValue("@nationality", player.Nationality);
 
-                conn.Open();
                 var numberOfCommits = await command.ExecuteNonQueryAsync();
                 if (numberOfCommits == 0)
                 {
-                    return "Not found";
+                    return "Insertion failed";
                 }
-                return "Succesfully added";
-            } 
+
+                return "Successfully added";
+            }
             catch (Exception ex)
             {
-                return (ex.Message);
+                
+                Console.WriteLine($"Exception: {ex.Message}");
+                return ex.Message;
             }
-            
         }
 
         public async Task<string> DeletePlayerAsync(Guid playerId)
@@ -92,13 +94,13 @@ namespace Football.Repository
                 {
                     var footballPlayer = new Player
                     {
-                        PlayerId = reader.GetGuid(reader.GetOrdinal("player_id")),
-                        TeamId = reader.IsDBNull(reader.GetOrdinal("team_id")) ? (Guid?)null : reader.GetGuid(reader.GetOrdinal("team_id")),
-                        PlayerName = reader.IsDBNull(reader.GetOrdinal("player_name")) ? null : reader.GetString(reader.GetOrdinal("player_name")),
-                        Position = reader.IsDBNull(reader.GetOrdinal("position")) ? null : reader.GetString(reader.GetOrdinal("position")),
-                        Number = reader.IsDBNull(reader.GetOrdinal("number")) ? 0 : reader.GetInt32(reader.GetOrdinal("number")),
-                        Age = reader.IsDBNull(reader.GetOrdinal("age")) ? 0 : reader.GetInt32(reader.GetOrdinal("age")),
-                        Nationality = reader.IsDBNull(reader.GetOrdinal("nationality")) ? null : reader.GetString(reader.GetOrdinal("nationality"))
+                        PlayerId = Guid.Parse(reader[0].ToString()),
+                        TeamId = Guid.TryParse(reader[1].ToString(), out var result) ? result : null,
+                        PlayerName = reader[2].ToString(),
+                        Position = reader[3].ToString(),
+                        Number = Convert.ToInt32(reader[4]),
+                        Age = Convert.ToInt32(reader[5]),
+                        Nationality = reader[6].ToString()
                     };
 
                     players.Add(footballPlayer);
@@ -112,23 +114,31 @@ namespace Football.Repository
         }
 
         public async Task<Player> GetPlayerByIdAsync(Guid id)
-
         {
             var footballPlayer = new Player();
 
             try
             {
-
-
                 using var conn = new NpgsqlConnection(connString);
+                await conn.OpenAsync();
+
+                
+                var checkPlayerCommandText = "SELECT COUNT(1) FROM \"Players\" WHERE \"player_id\" = @id";
+                using var checkPlayerCommand = new NpgsqlCommand(checkPlayerCommandText, conn);
+                checkPlayerCommand.Parameters.AddWithValue("@id", id);
+
+                var playerExists = (long)await checkPlayerCommand.ExecuteScalarAsync() > 0;
+                if (!playerExists)
+                {
+                    return null;
+                }
+
+                
                 var commandText = "SELECT * FROM \"Players\" WHERE \"player_id\" = @id;";
-
-
                 using var command = new NpgsqlCommand(commandText, conn);
                 command.Parameters.AddWithValue("@id", id);
 
-                conn.Open();
-                using var reader =await command.ExecuteReaderAsync();
+                using var reader = await command.ExecuteReaderAsync();
 
                 if (reader.HasRows)
                 {
@@ -141,63 +151,66 @@ namespace Football.Repository
                     footballPlayer.Number = Convert.ToInt32(reader[4]);
                     footballPlayer.Age = Convert.ToInt32(reader[5]);
                     footballPlayer.Nationality = reader[6].ToString();
-
-
                 }
-                if (footballPlayer == null)
+                else
                 {
-                    Console.WriteLine("Player not found");
+                    return null; 
                 }
-
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                
             }
 
-
             return footballPlayer;
-
         }
 
 
-        
+
+
+
+
         public async Task<bool> UpdatePlayersAsync(Guid id, Player player)
         {
             try
             {
                 using var conn = new NpgsqlConnection(connString);
-                var commandText = "UPDATE \"Players\" SET  team_id = @team_id,player_name = @player_name,position = @position,number = @number,age = @age,nationality = @nationality WHERE player_id = @id";
+                await conn.OpenAsync();
+
+                
+                var checkPlayerCommandText = "SELECT COUNT(1) FROM \"Players\" WHERE \"player_id\" = @id";
+                using var checkPlayerCommand = new NpgsqlCommand(checkPlayerCommandText, conn);
+                checkPlayerCommand.Parameters.AddWithValue("@id", id);
+
+                var playerExists = (long)await checkPlayerCommand.ExecuteScalarAsync() > 0;
+                if (!playerExists)
+                {
+                    return false; 
+                }
+
+                
+                var commandText = "UPDATE \"Players\" SET player_name = @player_name, position = @position, number = @number, age = @age, nationality = @nationality WHERE player_id = @id";
                 using var command = new NpgsqlCommand(commandText, conn);
 
                 command.Parameters.AddWithValue("@id", id);
-                command.Parameters.AddWithValue("@player_id", NpgsqlTypes.NpgsqlDbType.Uuid, Guid.NewGuid());
-                command.Parameters.AddWithValue("@team_id", NpgsqlTypes.NpgsqlDbType.Uuid, (object)player.TeamId ?? DBNull.Value);
                 command.Parameters.AddWithValue("@player_name", player.PlayerName);
                 command.Parameters.AddWithValue("@position", player.Position);
                 command.Parameters.AddWithValue("@number", player.Number);
                 command.Parameters.AddWithValue("@age", player.Age);
                 command.Parameters.AddWithValue("@nationality", player.Nationality);
 
-
-                conn.Open();
                 var numberOfCommits = await command.ExecuteNonQueryAsync();
 
-                if (numberOfCommits == 0)
-                {
-                    return false;
-                      
-                }
-                return true;
+                return numberOfCommits > 0;
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 return false;
-                    
             }
-
         }
+        
     }
 }
 

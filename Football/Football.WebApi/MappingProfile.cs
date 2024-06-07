@@ -11,6 +11,7 @@ namespace Football.WebApi
             CreateMap<Player, PlayerDto>();
             CreateMap<CreatePlayerDto, Player>();
             CreateMap<UpdatePlayerDto, Player>();
+            
         }
     }
 }
