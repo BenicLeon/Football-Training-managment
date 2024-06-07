@@ -71,12 +71,6 @@ namespace Football.WebApi.Controllers
                 var players = await _footballService.GetPlayerAsync();
                 var playerDtos = _mapper.Map<IEnumerable<PlayerDto>>(players);
 
-                // Log the mapped DTOs to ensure they contain the expected values
-                foreach (var playerDto in playerDtos)
-                {
-                    Console.WriteLine($"PlayerId: {playerDto.PlayerId}, PlayerName: {playerDto.PlayerName}, Position: {playerDto.Position}, Number: {playerDto.Number}, Age: {playerDto.Age}, Nationality: {playerDto.Nationality}");
-                }
-
                 return Ok(playerDtos);
             }
             catch (Exception ex)
