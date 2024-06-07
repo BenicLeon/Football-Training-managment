@@ -12,5 +12,7 @@ namespace Football.Repository.Common
         Task<Player> GetPlayerByIdAsync(Guid id);
 
         Task<bool> UpdatePlayersAsync(Guid id, Player player);
+
+        
     }
 }
