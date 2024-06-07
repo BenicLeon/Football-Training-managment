@@ -49,18 +49,17 @@ namespace Football.Repository
             }
             
         }
-        
-        public async Task<string> DeletePlayerAsync(Player player)
+
+        public async Task<string> DeletePlayerAsync(Guid playerId)
         {
             try
             {
                 using var conn = new NpgsqlConnection(connString);
-                var commandText = "DELETE FROM \"Players\" WHERE player_id = @player_id;;";
+                var commandText = "DELETE FROM \"Players\" WHERE player_id = @player_id;";
 
                 using var command = new NpgsqlCommand(commandText, conn);
-                
-                command.Parameters.AddWithValue("@player_id", NpgsqlTypes.NpgsqlDbType.Uuid, player.PlayerId);
 
+                command.Parameters.AddWithValue("@player_id", NpgsqlTypes.NpgsqlDbType.Uuid, playerId);
 
                 conn.Open();
                 var numberOfCommits = await command.ExecuteNonQueryAsync();
@@ -68,22 +67,19 @@ namespace Football.Repository
                 {
                     return "Player not found.";
                 }
-                return "Succesfully deleted";
+                return "Successfully deleted";
             }
             catch (Exception ex)
             {
                 return ex.Message;
             }
-
         }
-       
-        public async Task<List<Player>> GetPlayerAsync()
 
+        public async Task<List<Player>> GetPlayerAsync()
         {
             var players = new List<Player>();
             try
             {
-
                 using var conn = new NpgsqlConnection(connString);
                 var commandText = "SELECT * FROM \"Players\";";
 
@@ -91,24 +87,21 @@ namespace Football.Repository
 
                 conn.Open();
                 using var reader = await command.ExecuteReaderAsync();
-                
 
-                if (reader.HasRows)
+                while (await reader.ReadAsync())
                 {
-                    while (await reader.ReadAsync())
+                    var footballPlayer = new Player
                     {
-                        var footballPlayer = new Player();
-                        footballPlayer.PlayerId = Guid.Parse(reader[0].ToString());
-                        footballPlayer.TeamId = Guid.TryParse(reader[1].ToString(), out var result) ? result : null;
-                        footballPlayer.PlayerName = reader[2].ToString();
-                        footballPlayer.Position = reader[3].ToString();
-                        footballPlayer.Number = Convert.ToInt32(reader[4]);
-                        footballPlayer.Age = Convert.ToInt32(reader[5]);
-                        footballPlayer.Nationality = reader[6].ToString();
+                        PlayerId = reader.GetGuid(reader.GetOrdinal("player_id")),
+                        TeamId = reader.IsDBNull(reader.GetOrdinal("team_id")) ? (Guid?)null : reader.GetGuid(reader.GetOrdinal("team_id")),
+                        PlayerName = reader.IsDBNull(reader.GetOrdinal("player_name")) ? null : reader.GetString(reader.GetOrdinal("player_name")),
+                        Position = reader.IsDBNull(reader.GetOrdinal("position")) ? null : reader.GetString(reader.GetOrdinal("position")),
+                        Number = reader.IsDBNull(reader.GetOrdinal("number")) ? 0 : reader.GetInt32(reader.GetOrdinal("number")),
+                        Age = reader.IsDBNull(reader.GetOrdinal("age")) ? 0 : reader.GetInt32(reader.GetOrdinal("age")),
+                        Nationality = reader.IsDBNull(reader.GetOrdinal("nationality")) ? null : reader.GetString(reader.GetOrdinal("nationality"))
+                    };
 
-                        players.Add(footballPlayer);
-                        
-                    }
+                    players.Add(footballPlayer);
                 }
             }
             catch (Exception ex)
@@ -116,9 +109,8 @@ namespace Football.Repository
                 Console.WriteLine(ex.Message);
             }
             return players;
-
         }
-        
+
         public async Task<Player> GetPlayerByIdAsync(Guid id)
 
         {
@@ -170,7 +162,7 @@ namespace Football.Repository
 
 
         
-        public async Task<string> UpdatePlayersAsync(Guid id, Player player)
+        public async Task<bool> UpdatePlayersAsync(Guid id, Player player)
         {
             try
             {
@@ -193,14 +185,16 @@ namespace Football.Repository
 
                 if (numberOfCommits == 0)
                 {
-                    return "Player not found";
+                    return false;
                       
                 }
-                return "Succesfully updated";
+                return true;
             }
             catch (Exception ex)
             {
-                return ex.Message;
+                Console.WriteLine(ex.Message);
+                return false;
+                    
             }
 
         }
