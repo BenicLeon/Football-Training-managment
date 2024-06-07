@@ -27,12 +27,12 @@ builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
     containerBuilder
         .RegisterType<FootballService>()
         .As<IFootballService>()
-        .InstancePerLifetimeScope();
+        .InstancePerDependency();
 
     containerBuilder
         .RegisterType<FootballRepository>()
         .As<IFootballRepository>()
-        .InstancePerLifetimeScope();
+        .InstancePerDependency();
 
     containerBuilder.RegisterInstance(mapper).As<IMapper>().SingleInstance();
 });

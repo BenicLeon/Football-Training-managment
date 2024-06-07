@@ -32,23 +32,20 @@ namespace Football.Service
         public async Task<Player> GetPlayerByIdAsync(Guid id)
         {
             Player player = await _playerRepository.GetPlayerByIdAsync(id);
-           return player;
+            if (player == null)
+            {
+                return null;
+            }
+            return player;
         }
         public async Task<bool> UpdatePlayersAsync(Guid id, Player player)
-
         {
-            var playerAvailable = await _playerRepository.GetPlayerByIdAsync(id);
-            if (playerAvailable != null && playerAvailable.PlayerId == player.PlayerId)
+            var playerExists = await _playerRepository.GetPlayerByIdAsync(id);
+            if (playerExists != null)
             {
-                var updateResult = await _playerRepository.UpdatePlayersAsync(id, player);
-
-                
-                return updateResult;
+                return await _playerRepository.UpdatePlayersAsync(id, player);
             }
-            else
-            {
-                return false;
-            }
+            return false;
         }
 
     }
