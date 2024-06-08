@@ -11,7 +11,7 @@ namespace Football.Model
         public Guid? TeamId { get; set; }
 
        
-        public string PlayerName { get; set; }
+        public string Name { get; set; }
 
         
         public string Position { get; set; }

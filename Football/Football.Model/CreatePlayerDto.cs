@@ -8,7 +8,7 @@ namespace Football.Model
 {
     public class CreatePlayerDto
     {
-        public string PlayerName { get; set; }
+        public string Name { get; set; }
         public string Position { get; set; }
         public int Number { get; set; }
         public int Age { get; set; }
