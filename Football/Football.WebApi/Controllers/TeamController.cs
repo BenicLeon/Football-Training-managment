@@ -106,7 +106,7 @@ namespace Football.WebApi.Controllers
             try
             {
                 var player = _mapper.Map<Player>(updatePlayerDto);
-                player.PlayerId = id;
+                player.Id = id;
                 var updateResult = await _footballService.UpdatePlayersAsync(id, player);
 
                 if (updateResult)

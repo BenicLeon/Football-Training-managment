@@ -24,13 +24,13 @@ namespace Football.Repository
                 await conn.OpenAsync();
 
                
-                var commandText = "INSERT INTO \"Players\" (player_id, team_id, player_name, position, number, age, nationality) VALUES (@player_id, @team_id, @player_name, @position, @number, @age, @nationality)";
+                var commandText = "INSERT INTO \"Players\" (\"Id\", \"Team_id\", \"Name\", \"Position\", \"Number\", \"Age\", \"Nationality\") VALUES (@id, @team_id, @name, @position, @number, @age, @nationality)";
                 using var command = new NpgsqlCommand(commandText, conn);
 
                 
-                command.Parameters.AddWithValue("@player_id", NpgsqlTypes.NpgsqlDbType.Uuid, Guid.NewGuid());
+                command.Parameters.AddWithValue("@id", NpgsqlTypes.NpgsqlDbType.Uuid, Guid.NewGuid());
                 command.Parameters.AddWithValue("@team_id", NpgsqlTypes.NpgsqlDbType.Uuid, (object)player.TeamId ?? DBNull.Value);
-                command.Parameters.AddWithValue("@player_name", player.PlayerName);
+                command.Parameters.AddWithValue("@name", player.Name);
                 command.Parameters.AddWithValue("@position", player.Position);
                 command.Parameters.AddWithValue("@number", player.Number);
                 command.Parameters.AddWithValue("@age", player.Age);
@@ -57,11 +57,11 @@ namespace Football.Repository
             try
             {
                 using var conn = new NpgsqlConnection(connString);
-                var commandText = "DELETE FROM \"Players\" WHERE player_id = @player_id;";
+                var commandText = "DELETE FROM \"Players\" WHERE \"Id\" = @id;";
 
                 using var command = new NpgsqlCommand(commandText, conn);
 
-                command.Parameters.AddWithValue("@player_id", NpgsqlTypes.NpgsqlDbType.Uuid, playerId);
+                command.Parameters.AddWithValue("@id", NpgsqlTypes.NpgsqlDbType.Uuid, playerId);
 
                 conn.Open();
                 var numberOfCommits = await command.ExecuteNonQueryAsync();
@@ -96,7 +96,7 @@ namespace Football.Repository
                     {
                         Id = Guid.Parse(reader[0].ToString()),
                         TeamId = Guid.TryParse(reader[1].ToString(), out var result) ? result : null,
-                        PlayerName = reader[2].ToString(),
+                        Name = reader[2].ToString(),
                         Position = reader[3].ToString(),
                         Number = Convert.ToInt32(reader[4]),
                         Age = Convert.ToInt32(reader[5]),
@@ -123,7 +123,7 @@ namespace Football.Repository
                 await conn.OpenAsync();
 
                 
-                var checkPlayerCommandText = "SELECT COUNT(1) FROM \"Players\" WHERE \"player_id\" = @id";
+                var checkPlayerCommandText = "SELECT COUNT(1) FROM \"Players\" WHERE \"Id\" = @id";
                 using var checkPlayerCommand = new NpgsqlCommand(checkPlayerCommandText, conn);
                 checkPlayerCommand.Parameters.AddWithValue("@id", id);
 
@@ -134,7 +134,7 @@ namespace Football.Repository
                 }
 
                 
-                var commandText = "SELECT * FROM \"Players\" WHERE \"player_id\" = @id;";
+                var commandText = "SELECT * FROM \"Players\" WHERE \"Id\" = @id;";
                 using var command = new NpgsqlCommand(commandText, conn);
                 command.Parameters.AddWithValue("@id", id);
 
@@ -146,7 +146,7 @@ namespace Football.Repository
                     await reader.ReadAsync();
                     footballPlayer.Id = Guid.Parse(reader[0].ToString());
                     footballPlayer.TeamId = Guid.TryParse(reader[1].ToString(), out var result) ? result : null;
-                    footballPlayer.PlayerName = reader[2].ToString();
+                    footballPlayer.Name = reader[2].ToString();
                     footballPlayer.Position = reader[3].ToString();
                     footballPlayer.Number = Convert.ToInt32(reader[4]);
                     footballPlayer.Age = Convert.ToInt32(reader[5]);
@@ -179,7 +179,7 @@ namespace Football.Repository
                 await conn.OpenAsync();
 
                 
-                var checkPlayerCommandText = "SELECT COUNT(1) FROM \"Players\" WHERE \"player_id\" = @id";
+                var checkPlayerCommandText = "SELECT COUNT(1) FROM \"Players\" WHERE \"Id\" = @id";
                 using var checkPlayerCommand = new NpgsqlCommand(checkPlayerCommandText, conn);
                 checkPlayerCommand.Parameters.AddWithValue("@id", id);
 
@@ -190,11 +190,11 @@ namespace Football.Repository
                 }
 
                 
-                var commandText = "UPDATE \"Players\" SET player_name = @player_name, position = @position, number = @number, age = @age, nationality = @nationality WHERE player_id = @id";
+                var commandText = "UPDATE \"Players\" SET  \"Name\" = @player_name, \"Position\" = @position, \"Number\" = @number, \"Age\" = @age, \"Nationality\" = @nationality WHERE \"Id\" = @id";
                 using var command = new NpgsqlCommand(commandText, conn);
 
                 command.Parameters.AddWithValue("@id", id);
-                command.Parameters.AddWithValue("@player_name", player.PlayerName);
+                command.Parameters.AddWithValue("@player_name", player.Name);
                 command.Parameters.AddWithValue("@position", player.Position);
                 command.Parameters.AddWithValue("@number", player.Number);
                 command.Parameters.AddWithValue("@age", player.Age);
