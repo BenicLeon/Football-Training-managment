@@ -94,7 +94,7 @@ namespace Football.Repository
                 {
                     var footballPlayer = new Player
                     {
-                        PlayerId = Guid.Parse(reader[0].ToString()),
+                        Id = Guid.Parse(reader[0].ToString()),
                         TeamId = Guid.TryParse(reader[1].ToString(), out var result) ? result : null,
                         PlayerName = reader[2].ToString(),
                         Position = reader[3].ToString(),
@@ -144,7 +144,7 @@ namespace Football.Repository
                 {
 
                     await reader.ReadAsync();
-                    footballPlayer.PlayerId = Guid.Parse(reader[0].ToString());
+                    footballPlayer.Id = Guid.Parse(reader[0].ToString());
                     footballPlayer.TeamId = Guid.TryParse(reader[1].ToString(), out var result) ? result : null;
                     footballPlayer.PlayerName = reader[2].ToString();
                     footballPlayer.Position = reader[3].ToString();

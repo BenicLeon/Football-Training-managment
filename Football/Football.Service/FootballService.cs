@@ -21,8 +21,8 @@ namespace Football.Service
             return result;
         }
         public async Task<string> DeletePlayerAsync(Guid id) { 
-            string result = await _playerRepository.DeletePlayerAsync(id);
-            return result;
+           
+            return await _playerRepository.DeletePlayerAsync(id);
         }
         public async Task<List<Player>> GetPlayerAsync() {
             List<Player> players = await _playerRepository.GetPlayerAsync(); 

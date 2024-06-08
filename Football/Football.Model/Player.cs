@@ -5,7 +5,7 @@ namespace Football.Model
 {
     public class Player
     {
-        public Guid PlayerId { get; set; }
+        public Guid Id { get; set; }
 
         
         public Guid? TeamId { get; set; }
