@@ -5,13 +5,13 @@ namespace Football.Model
 {
     public class Player
     {
-        public Guid PlayerId { get; set; }
+        public Guid Id { get; set; }
 
         
         public Guid? TeamId { get; set; }
 
        
-        public string PlayerName { get; set; }
+        public string Name { get; set; }
 
         
         public string Position { get; set; }
