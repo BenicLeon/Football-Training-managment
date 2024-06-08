@@ -16,18 +16,18 @@ namespace Football.Service
         }
         public async Task<string> PostPlayerAsync(Player player)
         {
-            string result = await _playerRepository.PostPlayerAsync(player);
+           
 
-            return result;
+            return await _playerRepository.PostPlayerAsync(player);
         }
         public async Task<string> DeletePlayerAsync(Guid id) { 
            
             return await _playerRepository.DeletePlayerAsync(id);
         }
         public async Task<List<Player>> GetPlayerAsync() {
-            List<Player> players = await _playerRepository.GetPlayerAsync(); 
-            return players;
-               
+            
+            return await _playerRepository.GetPlayerAsync();
+
         }
         public async Task<Player> GetPlayerByIdAsync(Guid id)
         {
