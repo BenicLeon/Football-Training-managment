@@ -1,5 +1,5 @@
 ﻿using Football.WebApi;
-using Football.Service;
+using Football.Service.Common;
 using Football.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Numerics;
+using AutoMapper;
 
 namespace Football.WebApi.Controllers
 {
@@ -20,23 +21,24 @@ namespace Football.WebApi.Controllers
     {
 
         private readonly ILogger<TeamController> _logger;
-        
+        private readonly IMapper _mapper;
+        private IFootballService _footballService;
 
-        public TeamController(ILogger<TeamController> logger)
+        public TeamController(ILogger<TeamController> logger, IFootballService footballService, IMapper mapper)
         {
             _logger = logger;
-            
+            _footballService = footballService;
+            _mapper = mapper; 
+
         }
 
-
-        FootballService service = new FootballService();
-
         [HttpPost("AddPlayer")]
-        public ActionResult Post(Player player)
+        public async Task<ActionResult> Post(CreatePlayerDto createPlayerDto)
         {
             try
             {
-                service.PostPlayer(player);
+                var player = _mapper.Map<Player>(createPlayerDto);
+               await _footballService.PostPlayerAsync(player);
                 return Ok("Succesfully added");
             }
                
@@ -48,12 +50,12 @@ namespace Football.WebApi.Controllers
 
         }
         [HttpDelete("DeletePlayer")]
-        public ActionResult Delete(Player player)
+        public async Task<ActionResult> Delete(Guid id)
         {
             try
             {
-               
-                return Ok(service.DeletePlayer(player)); 
+                await _footballService.DeletePlayerAsync(id);
+                return Ok("Successfully deleted");
             }
             catch (Exception ex)
             {
@@ -62,28 +64,33 @@ namespace Football.WebApi.Controllers
 
         }
         [HttpGet("GetAllPlayers")]
-        public ActionResult Get()
-
+        public async Task<ActionResult<IEnumerable<PlayerDto>>> Get()
         {
             try
             {
-                
-                return Ok(service.GetPlayer());
+                var players = await _footballService.GetPlayerAsync();
+                var playerDtos = _mapper.Map<IEnumerable<PlayerDto>>(players);
+
+                return Ok(playerDtos);
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
-
         }
         [HttpGet("GetPlayerById")]
-        public ActionResult Get(Guid id)
+        public async Task<ActionResult<PlayerDto>> Get(Guid id)
 
         {
             try
             {
-                service.GetPlayerById(id);
-                return Ok("Succesfully updated");
+                var player = await _footballService.GetPlayerByIdAsync(id);
+                if (player == null)
+                {
+                    return NotFound("Player not found");
+                }
+                var playerDto = _mapper.Map<PlayerDto>(player);
+                return Ok(playerDto);
             }
             catch (Exception ex)
             {
@@ -91,22 +98,32 @@ namespace Football.WebApi.Controllers
             }
 
         }
-       
+
 
         [HttpPut("UpdatePlayer/{id}")]
-        public ActionResult Put(Guid id, Player player)
+        public async Task<ActionResult> Put(Guid id, UpdatePlayerDto updatePlayerDto)
         {
             try
             {
-               service.UpdatePlayers(id, player);
-                return Ok("Succesfully updated");
+                var player = _mapper.Map<Player>(updatePlayerDto);
+                player.Id = id;
+                var updateResult = await _footballService.UpdatePlayersAsync(id, player);
+
+                if (updateResult)
+                {
+                    return Ok("Successfully updated");
+                }
+                else
+                {
+                    return NotFound("Player not found");
+                }
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
-
         }
+      
     }
 }
 

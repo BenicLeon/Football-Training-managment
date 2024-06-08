@@ -13,4 +13,9 @@
     <ProjectReference Include="..\Football.Service.Common\Football.Service.Common.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Autofac" Version="8.0.0" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="9.0.0" />
+  </ItemGroup>
+
 </Project>

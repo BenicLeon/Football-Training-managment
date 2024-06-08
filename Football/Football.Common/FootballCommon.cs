@@ -1,4 +1,4 @@
-﻿using Football.Model;
+﻿
 namespace Football.Common
     
 {

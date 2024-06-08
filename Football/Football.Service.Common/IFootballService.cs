@@ -8,14 +8,16 @@ namespace Football.Service.Common
 {
     public interface IFootballService
     {
-        public string PostPlayer(Player player);
+         Task<string> PostPlayerAsync(Player player);
 
-        public string DeletePlayer(Player player);
+         Task<string> DeletePlayerAsync(Guid id);
 
-        public List<Player> GetPlayer();
+         Task<List<Player>> GetPlayerAsync();
 
-        public Player GetPlayerById(Guid id);
+         Task<Player> GetPlayerByIdAsync(Guid id);
 
-        public string UpdatePlayers(Guid id, Player player);
+         Task<bool> UpdatePlayersAsync(Guid id, Player player);
+    
+         
     }
 }

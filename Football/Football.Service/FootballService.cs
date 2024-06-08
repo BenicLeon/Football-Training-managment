@@ -1,5 +1,5 @@
 ﻿using Football.Model;
-using Football.Repository;
+using Football.Repository.Common;
 using Football.Service.Common;
 
 
@@ -8,26 +8,46 @@ namespace Football.Service
 {
     public class FootballService: IFootballService
     {
-        FootballRepository playerRepository = new FootballRepository();
-        public string PostPlayer(Player player)
+        private IFootballRepository _playerRepository;
+
+        public FootballService(IFootballRepository playerRepository)
+        {
+            _playerRepository = playerRepository;
+        }
+        public async Task<string> PostPlayerAsync(Player player)
         {
            
-            return playerRepository.PostPlayer(player);
+
+            return await _playerRepository.PostPlayerAsync(player);
         }
-        public string DeletePlayer(Player player) { 
-            return playerRepository.DeletePlayer(player); 
+        public async Task<string> DeletePlayerAsync(Guid id) { 
+           
+            return await _playerRepository.DeletePlayerAsync(id);
         }
-        public List<Player> GetPlayer() {
-            return playerRepository.GetPlayer();
+        public async Task<List<Player>> GetPlayerAsync() {
+            
+            return await _playerRepository.GetPlayerAsync();
+
         }
-        public Player GetPlayerById(Guid id)
+        public async Task<Player> GetPlayerByIdAsync(Guid id)
         {
-            return playerRepository.GetPlayerById(id);
+            Player player = await _playerRepository.GetPlayerByIdAsync(id);
+            if (player == null)
+            {
+                return null;
+            }
+            return player;
         }
-        public string UpdatePlayers(Guid id, Player player)
+        public async Task<bool> UpdatePlayersAsync(Guid id, Player player)
         {
-            return playerRepository.UpdatePlayers(id, player);
+            var playerExists = await _playerRepository.GetPlayerByIdAsync(id);
+            if (playerExists != null)
+            {
+                return await _playerRepository.UpdatePlayersAsync(id, player);
+            }
+            return false;
         }
+       
 
     }
 }

@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Autofac" Version="8.0.0" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="9.0.0" />
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="Npgsql" Version="8.0.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
@@ -14,6 +18,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Football.Common\Football.Common.csproj" />
     <ProjectReference Include="..\Football.Model\Football.Model.csproj" />
+    <ProjectReference Include="..\Football.Repository.Common\Football.Repository.Common.csproj" />
+    <ProjectReference Include="..\Football.Repository\Football.Repository.csproj" />
+    <ProjectReference Include="..\Football.Service.Common\Football.Service.Common.csproj" />
     <ProjectReference Include="..\Football.Service\Football.Service.csproj" />
   </ItemGroup>
 
