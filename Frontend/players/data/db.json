@@ -1,0 +1,14 @@
+{
+  "players": [
+    {
+      "id": 1,
+      "checked": false,
+      "player": "Leon Benić"
+    },
+    {
+      "id": 2,
+      "checked": false,
+      "player": "Marko"
+    }
+  ]
+}
