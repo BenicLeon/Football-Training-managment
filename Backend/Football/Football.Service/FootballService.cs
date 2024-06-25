@@ -47,7 +47,10 @@ namespace Football.Service
             }
             return false;
         }
-       
+       public async Task<ServiceResponse<List<Player>>> GetPlayersWithFilterPagingAndSortAsync(FilterForPlayer filter, Paging paging, SortOrder sort)
+        {
+            return await _playerRepository.GetPlayersWithFilterPagingAndSortAsync(filter, paging, sort);
+        }
 
     }
 }

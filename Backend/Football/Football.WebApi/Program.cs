@@ -9,7 +9,7 @@ using Football.WebApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -37,7 +37,7 @@ builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
     containerBuilder.RegisterInstance(mapper).As<IMapper>().SingleInstance();
 });
 
-// Configure CORS policy
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp",

@@ -123,7 +123,18 @@ namespace Football.WebApi.Controllers
                 return BadRequest(ex.Message);
             }
         }
-      
+        [HttpGet("GetFilteredSortedPagedPlayers")]
+        public async Task<ActionResult<ServiceResponse<List<Player>>>> GetFilteredSortedPagedPlayers(
+    [FromQuery] FilterForPlayer filter,
+    [FromQuery] Paging paging,
+    [FromQuery] SortOrder sort)
+        {
+            var result = await _footballService.GetPlayersWithFilterPagingAndSortAsync(filter, paging, sort);
+            return Ok(result);
+        }
+
+
+
     }
 }
 

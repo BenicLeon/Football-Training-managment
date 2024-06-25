@@ -13,6 +13,9 @@ namespace Football.Repository.Common
 
         Task<bool> UpdatePlayersAsync(Guid id, Player player);
 
-        
+        Task<ServiceResponse<List<Player>>> GetPlayersWithFilterPagingAndSortAsync(FilterForPlayer filter, Paging paging, SortOrder sort);
+
+
+
     }
 }

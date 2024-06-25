@@ -83,3 +83,10 @@ form button {
 form button:hover {
   background-color: #218838;
 }
+.filters input, .paging input, .sorting select {
+  margin-right: 10px;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
