@@ -3,23 +3,19 @@ import axios from '../axios';
 import UpdatePlayer from './UpdatePlayer';
 import AddPlayer from './AddPlayer';
 
-
 const PlayerList = () => {
   const [players, setPlayers] = useState([]);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
-  const [filter, setFilter] = useState({ name: '', position: '', nationality: '' });
-  const [paging, setPaging] = useState({ pageSize: 10, pageNumber: 1 });
-  const [sort, setSort] = useState({ orderBy: 'name', orderDirection: 'asc' });
 
   useEffect(() => {
     fetchPlayers();
-  }, [filter, paging, sort]);
+  }, []);
 
   const fetchPlayers = () => {
-    axios.post('https://localhost:7070/Team/GetFilteredSortedPagedPlayers', { filter, paging, sort })
+    axios.get('https://localhost:7070/Team/GetAllPlayers')
       .then(response => {
-        setPlayers(response.data.data);
-        console.log('Players fetched:', response.data.data);
+        setPlayers(response.data);
+        console.log('Players fetched:', response.data);
       })
       .catch(error => console.error('Error fetching players:', error));
   };
@@ -32,7 +28,7 @@ const PlayerList = () => {
     axios.delete('https://localhost:7070/Team/DeletePlayer', { params: { id: playerId } })
       .then(() => {
         console.log('Player deleted:', playerId);
-        fetchPlayers(); 
+        setPlayers(players.filter(player => player.id !== playerId));
       })
       .catch(error => console.error('Error deleting player:', error));
   };
@@ -47,48 +43,10 @@ const PlayerList = () => {
     fetchPlayers(); 
   };
 
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setFilter(prevFilter => ({ ...prevFilter, [name]: value }));
-  };
-
-  const handlePageChange = (e) => {
-    const { name, value } = e.target;
-    setPaging(prevPaging => ({ ...prevPaging, [name]: parseInt(value) }));
-  };
-
-  const handleSortChange = (e) => {
-    const { name, value } = e.target;
-    setSort(prevSort => ({ ...prevSort, [name]: value }));
-  };
-
   return (
     <div className="container">
       <AddPlayer onAddPlayer={addPlayer} />
       <h2>Player List</h2>
-
-      <div className="filters">
-        <input type="text" name="name" placeholder="Filter by Name" onChange={handleFilterChange} />
-        <input type="text" name="position" placeholder="Filter by Position" onChange={handleFilterChange} />
-        <input type="text" name="nationality" placeholder="Filter by Nationality" onChange={handleFilterChange} />
-      </div>
-
-      <div className="paging">
-        <input type="number" name="pageSize" placeholder="Page Size" onChange={handlePageChange} />
-        <input type="number" name="pageNumber" placeholder="Page Number" onChange={handlePageChange} />
-      </div>
-
-      <div className="sorting">
-        <select name="orderBy" onChange={handleSortChange}>
-          <option value="name">Name</option>
-          <option value="age">Age</option>
-        </select>
-        <select name="orderDirection" onChange={handleSortChange}>
-          <option value="asc">Ascending</option>
-          <option value="desc">Descending</option>
-        </select>
-      </div>
-
       <table>
         <thead>
           <tr>
@@ -102,15 +60,15 @@ const PlayerList = () => {
         </thead>
         <tbody>
           {players.map(player => (
-            <tr key={player.id}>
+            <tr key={player.id}> {/* Ensure unique key */}
               <td>{player.name}</td>
               <td>{player.position}</td>
               <td>{player.number}</td>
               <td>{player.age}</td>
               <td>{player.nationality}</td>
               <td>
-                <button onClick={() => handleUpdate(player)}>Update</button>
-                <button onClick={() => handleDelete(player.id)}>Delete</button>
+                <button className='update' onClick={() => handleUpdate(player)}>Update</button>
+                <button className='delete' onClick={() => handleDelete(player.id)}>Delete</button>
               </td>
             </tr>
           ))}
