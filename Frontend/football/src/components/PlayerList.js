@@ -108,7 +108,7 @@ const PlayerList = () => {
     <div className="container">
       <AddPlayer onAddPlayer={addPlayer} />
       <h2>Player List</h2>
-      <button onClick={() => setShowFilter(true)}>Filter</button>
+      <button className="filter" onClick={() => setShowFilter(true)}>Filter</button>
       {showFilter && (
         <FilterForm 
           onClose={() => setShowFilter(false)} 
@@ -148,10 +148,10 @@ const PlayerList = () => {
             </tbody>
           </table>
           <div>
-            <button onClick={() => handlePageChange(filters.PageNumber - 1)} disabled={filters.PageNumber === 1}>
+            <button className='filter' onClick={() => handlePageChange(filters.PageNumber - 1)} disabled={filters.PageNumber === 1}>
               Previous
             </button>
-            <button onClick={() => handlePageChange(filters.PageNumber + 1)}>
+            <button className='filter' onClick={() => handlePageChange(filters.PageNumber + 1)}>
               Next
             </button>
           </div>
