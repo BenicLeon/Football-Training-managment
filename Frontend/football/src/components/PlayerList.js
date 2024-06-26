@@ -58,12 +58,15 @@ const PlayerList = () => {
         params: filters,
       });
       const filteredPlayers = response.data.data;
-      if (filteredPlayers.length === 0) {
+      if (filteredPlayers && filteredPlayers.length === 0) {
         setNoPlayersMessage('No players found for the selected filters.');
         setPlayers([]);
-      } else {
+      } else if (filteredPlayers) {
         setNoPlayersMessage('');
         setPlayers(filteredPlayers);
+      } else {
+        setNoPlayersMessage('No players found for the selected filters.');
+        setPlayers([]);
       }
     } catch (error) {
       console.error('Error fetching filtered players:', error);
@@ -100,9 +103,7 @@ const PlayerList = () => {
     setFilters({ ...filters, ...updatedFilters, PageNumber: 1 });
   };
 
-  const handlePageChange = (newPageNumber) => {
-    setFilters({ ...filters, PageNumber: newPageNumber });
-  };
+ 
 
   return (
     <div className="container">
@@ -147,14 +148,7 @@ const PlayerList = () => {
               ))}
             </tbody>
           </table>
-          <div>
-            <button className='filter' onClick={() => handlePageChange(filters.PageNumber - 1)} disabled={filters.PageNumber === 1}>
-              Previous
-            </button>
-            <button className='filter' onClick={() => handlePageChange(filters.PageNumber + 1)}>
-              Next
-            </button>
-          </div>
+          
         </div>
       )}
       {selectedPlayer && (
