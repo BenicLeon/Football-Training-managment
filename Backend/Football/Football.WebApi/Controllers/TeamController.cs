@@ -78,7 +78,7 @@ namespace Football.WebApi.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        [HttpGet("GetPlayerById")]
+        [HttpGet("GetPlayerById/{id:Guid}")]
         public async Task<ActionResult<PlayerDto>> Get(Guid id)
 
         {

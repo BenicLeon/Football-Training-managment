@@ -1,48 +1,59 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from '../axios';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
-const AddPlayer = ({ onAddPlayer }) => {
+const EditPlayer = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [player, setPlayer] = useState(null);
   const [name, setName] = useState('');
   const [position, setPosition] = useState('');
   const [number, setNumber] = useState(0);
   const [age, setAge] = useState(0);
   const [nationality, setNationality] = useState('');
-  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchPlayer = async () => {
+      try {
+        
+        const response = await axios.get(`https://localhost:7070/Team/GetPlayerById/${id}`);
+        const playerData = response.data;
+        setPlayer(playerData);
+        
+        setName(playerData.name);
+        setPosition(playerData.position);
+        setNumber(playerData.number);
+        setAge(playerData.age);
+        setNationality(playerData.nationality);
+      } catch (error) {
+        console.error('Error fetching player:', error);
+      }
+    };
+    fetchPlayer();
+  }, [id]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const newPlayer = { name, position, number, age, nationality };
-    console.log('Submitting player:', newPlayer);
-
+    const updatedPlayer = { id: player.id, name, position, number, age, nationality };
     try {
-      const response = await axios.post('https://localhost:7070/Team/AddPlayer', newPlayer);
-      console.log('Player added:', response.data);
-      onAddPlayer(response.data);
-
-      // Clear the form fields
-      setName('');
-      setPosition('');
-      setNumber(0);
-      setAge(0);
-      setNationality('');
-
-      // Navigate back to the players list after adding
+      await axios.put(`https://localhost:7070/Team/UpdatePlayer/${player.id}`, updatedPlayer);
       navigate('/players');
     } catch (error) {
-      console.error('Error adding player:', error);
+      console.error('Error updating player:', error);
     }
   };
 
+  if (!player) return <div>Loading...</div>;
+
   return (
     <div>
-      <h2>Add Player</h2>
+      <h2>Edit Player</h2>
       <form onSubmit={handleSubmit}>
         <input 
           type="text" 
           value={name} 
           onChange={(e) => setName(e.target.value)} 
-          placeholder="Full Name" 
+          placeholder="Player Name" 
           required 
         />
         <input 
@@ -73,10 +84,11 @@ const AddPlayer = ({ onAddPlayer }) => {
           placeholder="Nationality" 
           required 
         />
-        <button type="submit">Add Player</button>
+        <button type="submit">Update Player</button>
+        <button type="button" onClick={() => navigate('/players')}>Cancel</button>
       </form>
     </div>
   );
 };
 
-export default AddPlayer;
+export default EditPlayer;

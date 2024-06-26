@@ -6,7 +6,8 @@ body {
 }
 
 .container {
-  width: 80%;
+  width: 90%;
+  max-width: 1200px;
   margin: auto;
   overflow: hidden;
 }
@@ -26,7 +27,7 @@ table, th, td {
 }
 
 th, td {
-  padding: 12px;
+  padding: 8px;
   text-align: left;
 }
 
@@ -43,20 +44,26 @@ tr:hover {
 }
 
 button {
-  padding: 5px 10px;
-  margin-right: 5px;
+  padding: 5px 8px;
+  margin-right: 2px;
   border: none;
   color: #fff;
   cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.delete{
+.delete {
   background-color: red;
+  display: inline-block;
 }
 
-.update{
+.update {
   background-color: yellow;
   color: black;
+  display: inline-block;
 }
 
 .delete:hover {
@@ -80,18 +87,22 @@ form input, form select {
   border-radius: 4px;
 }
 
-form button,.filter {
+form button, .filter {
   background-color: #28a745;
   margin-bottom: 0.5em;
   margin-top: 0.3em;
+  padding: 10px 15px;
+  border-radius: 4px;
 }
 
-form button:hover {
+form button:hover, .filter:hover {
   background-color: #218838;
 }
 
 .filter-button {
   background-color: #007bff;
+  padding: 10px 15px;
+  border-radius: 4px;
 }
 
 .filter-button:hover {
@@ -100,6 +111,8 @@ form button:hover {
 
 .paging-button {
   background-color: #6c757d;
+  padding: 10px 15px;
+  border-radius: 4px;
 }
 
 .paging-button:hover {
@@ -116,4 +129,113 @@ form button:hover {
 .filter-input {
   width: calc(100% - 22px);
   box-sizing: border-box;
+}
+
+h1 {
+  color: red;
+}
+
+.nav-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8em;
+  background-color: black;
+}
+
+ul {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+li {
+  text-align: center;
+  text-decoration: none;
+  margin-left: 2em;
+  color: white;
+  cursor: pointer;
+  border-right-style: solid;
+  border-left-style: solid;
+  border-color: #28a745;
+  padding: 0.5em;
+}
+
+li:hover {
+  background-color: #28a745;
+  color: white;
+}
+
+li a {
+  color: white;
+  text-decoration: none;
+}
+
+li a:hover {
+  color: #218838;
+  color: white;
+}
+
+h3 {
+  color: #28a745;
+}
+
+.home-page {
+  text-align: center;
+  padding: 2em;
+}
+
+.home-page img {
+  width: 100%;
+  height: auto;
+  max-width: 600px;
+  margin-top: 20px;
+}
+
+.home-page p {
+  font-size: 1.2em;
+  margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+  .nav-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  ul {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  li {
+    margin: 0.5em 0;
+    padding: 0.5em 1em;
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  table, th, td {
+    font-size: 0.8em;
+  }
+
+  td {
+    padding: 5px;
+  }
+
+  td:nth-child(3) {
+    width: 30px;
+  }
+
+  td:nth-child(6) {
+    width: 100px;
+  }
+
+  button {
+    padding: 2px 5px;
+  }
 }

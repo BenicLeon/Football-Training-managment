@@ -30,12 +30,21 @@ const FilterForm = ({ onClose, onFilter, filterOptions }) => {
       <form onSubmit={handleSubmit}>
         <label>
           Name:
-          <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
+          <input 
+            type="text" 
+            value={name} 
+            onChange={(e) => setName(e.target.value)} 
+            className="filter-input" 
+          />
         </label>
         <br />
         <label>
           Position:
-          <select value={position} onChange={(e) => setPosition(e.target.value)}>
+          <select 
+            value={position} 
+            onChange={(e) => setPosition(e.target.value)} 
+            className="filter-input"
+          >
             <option value="">Select Position</option>
             {filterOptions.positions.map(option => (
               <option key={option} value={option}>{option}</option>
@@ -45,7 +54,11 @@ const FilterForm = ({ onClose, onFilter, filterOptions }) => {
         <br />
         <label>
           Nationality:
-          <select value={nationality} onChange={(e) => setNationality(e.target.value)}>
+          <select 
+            value={nationality} 
+            onChange={(e) => setNationality(e.target.value)} 
+            className="filter-input"
+          >
             <option value="">Select Nationality</option>
             {filterOptions.nationalities.map(option => (
               <option key={option} value={option}>{option}</option>
@@ -55,7 +68,11 @@ const FilterForm = ({ onClose, onFilter, filterOptions }) => {
         <br />
         <label>
           Sort By:
-          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+          <select 
+            value={sortBy} 
+            onChange={(e) => setSortBy(e.target.value)} 
+            className="filter-input"
+          >
             <option value="Name">Name</option>
             <option value="Position">Position</option>
             <option value="Number">Number</option>
@@ -66,7 +83,11 @@ const FilterForm = ({ onClose, onFilter, filterOptions }) => {
         <br />
         <label>
           Sort Order:
-          <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+          <select 
+            value={sortOrder} 
+            onChange={(e) => setSortOrder(e.target.value)} 
+            className="filter-input"
+          >
             <option value="ASC">Ascending</option>
             <option value="DESC">Descending</option>
           </select>
@@ -74,16 +95,26 @@ const FilterForm = ({ onClose, onFilter, filterOptions }) => {
         <br />
         <label>
           Page Size:
-          <input type="number" value={pageSize} onChange={(e) => setPageSize(e.target.value)} />
+          <input 
+            type="number" 
+            value={pageSize} 
+            onChange={(e) => setPageSize(e.target.value)} 
+            className="filter-input" 
+          />
         </label>
         <br />
         <label>
           Page Number:
-          <input type="number" value={pageNumber} onChange={(e) => setPageNumber(e.target.value)} />
+          <input 
+            type="number" 
+            value={pageNumber} 
+            onChange={(e) => setPageNumber(e.target.value)} 
+            className="filter-input" 
+          />
         </label>
         <br />
-        <button type="submit">Apply Filter</button>
-        <button type="button" onClick={onClose}>Close</button>
+        <button type="submit" className="filter-button">Apply Filter</button>
+        <button type="button" onClick={onClose} className="close-button">Close</button>
       </form>
     </div>
   );

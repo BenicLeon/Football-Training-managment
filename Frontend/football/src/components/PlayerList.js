@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import UpdatePlayer from './UpdatePlayer';
-import AddPlayer from './AddPlayer';
+import { useNavigate } from 'react-router-dom';
 import FilterForm from './FilterForm';
+import '../App.css';
 
 const PlayerList = () => {
   const [players, setPlayers] = useState([]);
-  const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [showFilter, setShowFilter] = useState(false);
   const [filterOptions, setFilterOptions] = useState({
     positions: [],
@@ -22,6 +21,7 @@ const PlayerList = () => {
     PageSize: 10,
     PageNumber: 1,
   });
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchPlayers();
@@ -37,7 +37,6 @@ const PlayerList = () => {
       const playersData = response.data;
       setPlayers(playersData);
 
-      
       const positions = [...new Set(playersData.map(player => player.position))];
       const nationalities = [...new Set(playersData.map(player => player.nationality))];
 
@@ -76,39 +75,28 @@ const PlayerList = () => {
   };
 
   const handleUpdate = (player) => {
-    setSelectedPlayer(player);
+    navigate(`/edit-player/${player.id}`);
   };
 
   const handleDelete = async (playerId) => {
-    try {
-      await axios.delete('https://localhost:7070/Team/DeletePlayer', { params: { id: playerId } });
-      console.log('Player deleted:', playerId);
-      setPlayers(players.filter(player => player.id !== playerId));
-    } catch (error) {
-      console.error('Error deleting player:', error);
+    if (window.confirm('Are you sure you want to delete this player?')) {
+      try {
+        await axios.delete('https://localhost:7070/Team/DeletePlayer', { params: { id: playerId } });
+        console.log('Player deleted:', playerId);
+        setPlayers(players.filter(player => player.id !== playerId));
+      } catch (error) {
+        console.error('Error deleting player:', error);
+      }
     }
-  };
-
-  const handlePlayerUpdated = (updatedPlayer) => {
-    setPlayers(players.map(player => player.id === updatedPlayer.id ? updatedPlayer : player));
-    setSelectedPlayer(null);
-  };
-
-  const addPlayer = (newPlayer) => {
-    console.log('Adding new player:', newPlayer);
-    fetchPlayers(); 
   };
 
   const handleFilterChange = (updatedFilters) => {
     setFilters({ ...filters, ...updatedFilters, PageNumber: 1 });
   };
 
- 
-
   return (
     <div className="container">
-      <AddPlayer onAddPlayer={addPlayer} />
-      <h2>Player List</h2>
+
       <button className="filter" onClick={() => setShowFilter(true)}>Filter</button>
       {showFilter && (
         <FilterForm 
@@ -126,7 +114,7 @@ const PlayerList = () => {
               <tr>
                 <th>Name</th>
                 <th>Position</th>
-                <th>Number</th>
+                <th style={{ width: '50px' }}>Number</th>
                 <th>Age</th>
                 <th>Nationality</th>
                 <th>Actions</th>
@@ -141,22 +129,18 @@ const PlayerList = () => {
                   <td>{player.age}</td>
                   <td>{player.nationality}</td>
                   <td>
-                    <button className='update' onClick={() => handleUpdate(player)}>Update</button>
-                    <button className='delete' onClick={() => handleDelete(player.id)}>Delete</button>
+                    <button className='update' onClick={() => handleUpdate(player)}>
+                      <i className="fas fa-edit"></i>
+                    </button>
+                    <button className='delete' onClick={() => handleDelete(player.id)}>
+                      <i className="fas fa-trash-alt"></i>
+                    </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          
         </div>
-      )}
-      {selectedPlayer && (
-        <UpdatePlayer 
-          player={selectedPlayer} 
-          onClose={() => setSelectedPlayer(null)} 
-          onPlayerUpdated={handlePlayerUpdated}
-        />
       )}
     </div>
   );
