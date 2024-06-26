@@ -27,18 +27,29 @@ builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
     containerBuilder
         .RegisterType<FootballService>()
         .As<IFootballService>()
-        .InstancePerDependency();
+        .SingleInstance();
 
     containerBuilder
         .RegisterType<FootballRepository>()
         .As<IFootballRepository>()
-        .InstancePerDependency();
+        .SingleInstance();
 
     containerBuilder.RegisterInstance(mapper).As<IMapper>().SingleInstance();
 });
 
-var app = builder.Build();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp",
+        builder =>
+        {
+            builder.WithOrigins("http://localhost:3000")
+                   .AllowAnyHeader()
+                   .AllowAnyMethod();
+        });
+});
+
+var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
@@ -47,6 +58,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+
+app.UseCors("AllowReactApp");
+
 app.UseAuthorization();
 app.MapControllers();
 app.Run();

@@ -1,20 +1,18 @@
 ﻿using Football.Model;
 using Football.Repository.Common;
-
 using Microsoft.Extensions.Logging;
 using Npgsql;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Numerics;
+using System.Net.NetworkInformation;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Football.Repository
 {
-    public class FootballRepository: IFootballRepository
-
+    public class FootballRepository : IFootballRepository
     {
         string connString = "Host=localhost;Username=postgres;Password=fcfullam13;Database=footballPlayers";
-
 
         public async Task<string> PostPlayerAsync(Player player)
         {
@@ -23,11 +21,9 @@ namespace Football.Repository
                 using var conn = new NpgsqlConnection(connString);
                 await conn.OpenAsync();
 
-               
                 var commandText = "INSERT INTO \"Players\" (\"Id\", \"Team_id\", \"Name\", \"Position\", \"Number\", \"Age\", \"Nationality\") VALUES (@id, @team_id, @name, @position, @number, @age, @nationality)";
                 using var command = new NpgsqlCommand(commandText, conn);
 
-                
                 command.Parameters.AddWithValue("@id", NpgsqlTypes.NpgsqlDbType.Uuid, Guid.NewGuid());
                 command.Parameters.AddWithValue("@team_id", NpgsqlTypes.NpgsqlDbType.Uuid, (object)player.TeamId ?? DBNull.Value);
                 command.Parameters.AddWithValue("@name", player.Name);
@@ -46,7 +42,6 @@ namespace Football.Repository
             }
             catch (Exception ex)
             {
-                
                 Console.WriteLine($"Exception: {ex.Message}");
                 return ex.Message;
             }
@@ -122,7 +117,6 @@ namespace Football.Repository
                 using var conn = new NpgsqlConnection(connString);
                 await conn.OpenAsync();
 
-                
                 var checkPlayerCommandText = "SELECT COUNT(1) FROM \"Players\" WHERE \"Id\" = @id";
                 using var checkPlayerCommand = new NpgsqlCommand(checkPlayerCommandText, conn);
                 checkPlayerCommand.Parameters.AddWithValue("@id", id);
@@ -133,7 +127,6 @@ namespace Football.Repository
                     return null;
                 }
 
-                
                 var commandText = "SELECT * FROM \"Players\" WHERE \"Id\" = @id;";
                 using var command = new NpgsqlCommand(commandText, conn);
                 command.Parameters.AddWithValue("@id", id);
@@ -142,7 +135,6 @@ namespace Football.Repository
 
                 if (reader.HasRows)
                 {
-
                     await reader.ReadAsync();
                     footballPlayer.Id = Guid.Parse(reader[0].ToString());
                     footballPlayer.TeamId = Guid.TryParse(reader[1].ToString(), out var result) ? result : null;
@@ -154,22 +146,16 @@ namespace Football.Repository
                 }
                 else
                 {
-                    return null; 
+                    return null;
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                
             }
 
             return footballPlayer;
         }
-
-
-
-
-
 
         public async Task<bool> UpdatePlayersAsync(Guid id, Player player)
         {
@@ -178,7 +164,6 @@ namespace Football.Repository
                 using var conn = new NpgsqlConnection(connString);
                 await conn.OpenAsync();
 
-                
                 var checkPlayerCommandText = "SELECT COUNT(1) FROM \"Players\" WHERE \"Id\" = @id";
                 using var checkPlayerCommand = new NpgsqlCommand(checkPlayerCommandText, conn);
                 checkPlayerCommand.Parameters.AddWithValue("@id", id);
@@ -186,10 +171,9 @@ namespace Football.Repository
                 var playerExists = (long)await checkPlayerCommand.ExecuteScalarAsync() > 0;
                 if (!playerExists)
                 {
-                    return false; 
+                    return false;
                 }
 
-                
                 var commandText = "UPDATE \"Players\" SET  \"Name\" = @player_name, \"Position\" = @position, \"Number\" = @number, \"Age\" = @age, \"Nationality\" = @nationality WHERE \"Id\" = @id";
                 using var command = new NpgsqlCommand(commandText, conn);
 
@@ -210,10 +194,107 @@ namespace Football.Repository
                 return false;
             }
         }
-        
+
+        public async Task<ServiceResponse<List<Player>>> GetPlayersWithFilterPagingAndSortAsync(FilterForPlayer filter, Paging paging, SortOrder sort)
+        {
+            var response = new ServiceResponse<List<Player>>();
+
+            StringBuilder query = ReturnConditionString(filter, paging, sort);
+
+            var listFromDB = new List<Player>();
+
+            using (var connection = new NpgsqlConnection(connString))
+            using (var command = new NpgsqlCommand(query.ToString(), connection))
+            {
+                SetFilterParams(command, filter, paging, sort);
+
+                await connection.OpenAsync();
+
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        listFromDB.Add(new Player
+                        {
+                            Id = Guid.Parse(reader["Id"].ToString()),
+                            TeamId = Guid.TryParse(reader["Team_Id"].ToString(), out var result) ? result : null,
+                            Name = reader["Name"].ToString(),
+                            Position = reader["Position"].ToString(),
+                            Number = Convert.ToInt32(reader["Number"]),
+                            Age = Convert.ToInt32(reader["Age"]),
+                            Nationality = reader["Nationality"].ToString()
+                        });
+                    }
+                }
+            }
+
+            if (listFromDB != null && listFromDB.Count > 0)
+            {
+                response.Data = listFromDB;
+                response.Success = true;
+            }
+            else
+            {
+                response.Message = "No data in database";
+                response.Success = false;
+            }
+
+            return response;
+        }
+
+
+        private void SetFilterParams(NpgsqlCommand command, FilterForPlayer filter, Paging paging, SortOrder sort)
+        {
+            if (!string.IsNullOrWhiteSpace(filter.Name))
+            {
+                command.Parameters.AddWithValue("@Name", "%" + filter.Name + "%");
+            }
+            if (!string.IsNullOrWhiteSpace(filter.Position))
+            {
+                command.Parameters.AddWithValue("@Position", "%" + filter.Position + "%");
+            }
+            if (!string.IsNullOrWhiteSpace(filter.Nationality))
+            {
+                command.Parameters.AddWithValue("@Nationality", "%" + filter.Nationality + "%");
+            }
+
+            command.Parameters.AddWithValue("@PageSize", paging.PageSize);
+            command.Parameters.AddWithValue("@PageNumber", paging.PageNumber);
+        }
+
+
+        private StringBuilder ReturnConditionString(FilterForPlayer filter, Paging paging, SortOrder sort)
+        {
+            StringBuilder query = new StringBuilder("SELECT * FROM \"Players\" WHERE 1=1");
+
+            if (!string.IsNullOrWhiteSpace(filter.Name))
+            {
+                query.Append(" AND \"Name\" LIKE @Name");
+            }
+
+            if (!string.IsNullOrWhiteSpace(filter.Position))
+            {
+                query.Append(" AND \"Position\" LIKE @Position");
+            }
+
+            if (!string.IsNullOrWhiteSpace(filter.Nationality))
+            {
+                query.Append(" AND \"Nationality\" LIKE @Nationality");
+            }
+
+            if (!string.IsNullOrEmpty(sort.OrderBy) && !string.IsNullOrEmpty(sort.OrderDirection))
+            {
+                query.Append($" ORDER BY \"{sort.OrderBy}\" {sort.OrderDirection}");
+            }
+
+            if (paging.PageSize > 0 && paging.PageNumber > 0)
+            {
+                int offset = (paging.PageNumber - 1) * paging.PageSize;
+                query.Append(" LIMIT @PageSize OFFSET " + offset);
+            }
+
+            return query;
+        }
+
     }
 }
-
-
-    
-
