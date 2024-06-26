@@ -203,46 +203,45 @@ namespace Football.Repository
 
             var listFromDB = new List<Player>();
 
-            var command = new NpgsqlCommand(query.ToString(), new NpgsqlConnection(connString));
-
-            SetFilterParams(command, filter, paging, sort);
-
-            command.Connection.Open();
-
-            var reader = await command.ExecuteReaderAsync();
-
-            while (await reader.ReadAsync())
+            using (var connection = new NpgsqlConnection(connString))
+            using (var command = new NpgsqlCommand(query.ToString(), connection))
             {
-                listFromDB.Add(new Player
+                SetFilterParams(command, filter, paging, sort);
+
+                await connection.OpenAsync();
+
+                using (var reader = await command.ExecuteReaderAsync())
                 {
-                    Id = Guid.Parse(reader[0].ToString()),
-                    TeamId = Guid.TryParse(reader[1].ToString(), out var result) ? result : null,
-                    Name = reader[2].ToString(),
-                    Position = reader[3].ToString(),
-                    Number = Convert.ToInt32(reader[4]),
-                    Age = Convert.ToInt32(reader[5]),
-                    Nationality = reader[6].ToString()
-                });
+                    while (await reader.ReadAsync())
+                    {
+                        listFromDB.Add(new Player
+                        {
+                            Id = Guid.Parse(reader["Id"].ToString()),
+                            TeamId = Guid.TryParse(reader["Team_Id"].ToString(), out var result) ? result : null,
+                            Name = reader["Name"].ToString(),
+                            Position = reader["Position"].ToString(),
+                            Number = Convert.ToInt32(reader["Number"]),
+                            Age = Convert.ToInt32(reader["Age"]),
+                            Nationality = reader["Nationality"].ToString()
+                        });
+                    }
+                }
             }
 
-            command.Connection.Close();
-            await reader.DisposeAsync();
-
-            if (listFromDB is not null)
+            if (listFromDB != null && listFromDB.Count > 0)
             {
                 response.Data = listFromDB;
                 response.Success = true;
-                return response;
             }
             else
             {
                 response.Message = "No data in database";
                 response.Success = false;
-                return response;
             }
+
+            return response;
         }
 
-        #region Extensions
 
         private void SetFilterParams(NpgsqlCommand command, FilterForPlayer filter, Paging paging, SortOrder sort)
         {
@@ -259,22 +258,14 @@ namespace Football.Repository
                 command.Parameters.AddWithValue("@Nationality", "%" + filter.Nationality + "%");
             }
 
-            if (!string.IsNullOrWhiteSpace(sort.OrderBy))
-            {
-                command.Parameters.AddWithValue("@OrderBy", sort.OrderBy);
-            }
-            if (!string.IsNullOrWhiteSpace(sort.OrderDirection))
-            {
-                command.Parameters.AddWithValue("@OrderDirection", sort.OrderDirection);
-            }
-
             command.Parameters.AddWithValue("@PageSize", paging.PageSize);
             command.Parameters.AddWithValue("@PageNumber", paging.PageNumber);
         }
 
+
         private StringBuilder ReturnConditionString(FilterForPlayer filter, Paging paging, SortOrder sort)
         {
-            StringBuilder query = new StringBuilder("SELECT * FROM \"Players\" WHERE \"IsActive\" = true");
+            StringBuilder query = new StringBuilder("SELECT * FROM \"Players\" WHERE 1=1");
 
             if (!string.IsNullOrWhiteSpace(filter.Name))
             {
@@ -291,19 +282,19 @@ namespace Football.Repository
                 query.Append(" AND \"Nationality\" LIKE @Nationality");
             }
 
-            if (!string.IsNullOrEmpty(sort.OrderDirection) && !string.IsNullOrEmpty(sort.OrderBy))
+            if (!string.IsNullOrEmpty(sort.OrderBy) && !string.IsNullOrEmpty(sort.OrderDirection))
             {
-                query.Append($" ORDER BY \"{sort.OrderBy}\"  {sort.OrderDirection} ");
+                query.Append($" ORDER BY \"{sort.OrderBy}\" {sort.OrderDirection}");
             }
 
-            if (int.IsPositive(paging.PageSize) && paging.PageNumber > 0)
+            if (paging.PageSize > 0 && paging.PageNumber > 0)
             {
-                int page = (paging.PageNumber - 1) * paging.PageSize;
-                query.Append(" LIMIT @PageSize OFFSET " + page);
+                int offset = (paging.PageNumber - 1) * paging.PageSize;
+                query.Append(" LIMIT @PageSize OFFSET " + offset);
             }
 
             return query;
         }
-        #endregion
+
     }
 }

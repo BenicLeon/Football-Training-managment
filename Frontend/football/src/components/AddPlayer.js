@@ -37,7 +37,7 @@ const AddPlayer = ({ onAddPlayer }) => {
           type="text" 
           value={name} 
           onChange={(e) => setName(e.target.value)} 
-          placeholder="Player Name" 
+          placeholder="Full Name" 
           required 
         />
         <input 
